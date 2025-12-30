@@ -23,7 +23,10 @@ import com.velocitypowered.proxy.protocol.MinecraftPacket;
 import com.velocitypowered.proxy.protocol.ProtocolUtils;
 import com.velocitypowered.proxy.util.except.QuietDecoderException;
 import io.netty.buffer.ByteBuf;
+import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class KnownPacksPacket implements MinecraftPacket {
 
@@ -32,6 +35,14 @@ public class KnownPacksPacket implements MinecraftPacket {
         new QuietDecoderException("too many known packs");
 
     private List<KnownPack> packs;
+
+  public KnownPacksPacket() {
+    packs = new ArrayList<>();
+  }
+
+  public KnownPacksPacket(List<KnownPack> packs) {
+    this.packs = packs;
+  }
 
     @Override
     public void decode(ByteBuf buf, ProtocolUtils.Direction direction,
@@ -65,6 +76,10 @@ public class KnownPacksPacket implements MinecraftPacket {
         return handler.handle(this);
     }
 
+    public List<KnownPack> getPacks() {
+      return packs;
+    }
+
     public record KnownPack(String namespace, String id, String version) {
         private static KnownPack read(ByteBuf buf) {
             return new KnownPack(ProtocolUtils.readString(buf), ProtocolUtils.readString(buf), ProtocolUtils.readString(buf));
@@ -75,5 +90,27 @@ public class KnownPacksPacket implements MinecraftPacket {
             ProtocolUtils.writeString(buf, id);
             ProtocolUtils.writeString(buf, version);
         }
+
+      @Override
+      public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        KnownPack knownPack = (KnownPack) o;
+        return Objects.equals(id, knownPack.id) && Objects.equals(version, knownPack.version) && Objects.equals(namespace, knownPack.namespace);
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hash(namespace, id, version);
+      }
+
+      @Override
+      @NotNull
+      public String toString() {
+        return "KnownPack{" +
+            "namespace='" + namespace + '\'' +
+            ", id='" + id + '\'' +
+            ", version='" + version + '\'' +
+            '}';
+      }
     }
 }
