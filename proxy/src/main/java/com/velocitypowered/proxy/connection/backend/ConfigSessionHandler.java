@@ -66,9 +66,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import net.kyori.adventure.key.Key;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -348,10 +348,11 @@ public class ConfigSessionHandler implements MinecraftSessionHandler {
       );
       serverConn.ensureConnected().write(
           new KnownPacksPacket(
-              Arrays.stream(packet.getPacks())
+              packet.getPacks()
+                  .stream()
                   .distinct()
                   .filter(clientPacks::contains)
-                  .toArray(KnownPacksPacket.KnownPack[]::new)
+                  .collect(Collectors.toList())
           )
       );
       return true;
